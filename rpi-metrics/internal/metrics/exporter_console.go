@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"time"
@@ -11,12 +12,13 @@ type ConsoleExporter struct {
 }
 
 type consoleEnvelope struct {
-	CollectedAt time.Time         `json:"collected_at"`
-	Samples     []Sample          `json:"samples"`
-	Errors      []CollectorError  `json:"errors,omitempty"`
+	CollectedAt time.Time        `json:"collected_at"`
+	Samples     []Sample         `json:"samples"`
+	Errors      []CollectorError `json:"errors,omitempty"`
 }
 
-func (e ConsoleExporter) Export(res Result) error {
+func (e ConsoleExporter) Export(ctx context.Context, res Result) error {
+	_ = ctx
 	env := consoleEnvelope{
 		CollectedAt: time.Now().UTC(),
 		Samples:     res.Samples,

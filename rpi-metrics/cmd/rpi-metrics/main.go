@@ -16,6 +16,8 @@ import (
 func main() {
 	interval := flag.Duration("interval", 5*time.Second, "collection interval (e.g. 2s, 500ms, 1m)")
 	tempPath := flag.String("temp-path", "/sys/class/thermal/thermal_zone0/temp", "sysfs path for CPU temperature")
+	discordWebhook := flag.String("discord-webhook", "", "Discord webhook URL (optional)")
+	discordEvery := flag.Duration("discord-every", 0, "How often to post to Discord (0 disables). e.g. 1m, 10m, 1h")
 	flag.Parse()
 
 	// Register collectors
@@ -24,7 +26,15 @@ func main() {
 	}
 
 	runner := metrics.Runner{Collectors: metrics.All()}
-	exporter := metrics.ConsoleExporter{Out: os.Stdout}
+	exporters := []metrics.Exporter{
+		metrics.ConsoleExporter{Out: os.Stdout},
+	}
+	if *discordWebhook != "" && *discordEvery > 0 {
+		exporters = append(exporters, &metrics.DiscordWebhookExporter{
+			WebhookURL:  *discordWebhook,
+			MinInterval: *discordEvery,
+		})
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -43,8 +53,10 @@ func main() {
 	// Collect immediately once, then on interval
 	for {
 		res := runner.CollectOnce(ctx)
-		if err := exporter.Export(res); err != nil {
-			log.Printf("export error: %v", err)
+		for _, exporter := range exporters {
+			if err := exporter.Export(ctx, res); err != nil {
+				log.Printf("export error: %v", err)
+			}
 		}
 
 		select {
