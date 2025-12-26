@@ -49,6 +49,12 @@ Example output (JSON line per interval):
 class/thermal/thermal_zone0/temp","source":"sysfs"}}]}
 ```
 
+To run discord messenger: 
+
+```
+./bin/rpi-metrics -interval= {x}s -discord-webhook="https://discord.com/api/webhooks/{webook_id}" -discord-every= {x}s
+```
+
 Flags
 - `interval` -
     Collection interval duration (Go duration format). Examples: 500ms, 2s, 30s, 1m.
