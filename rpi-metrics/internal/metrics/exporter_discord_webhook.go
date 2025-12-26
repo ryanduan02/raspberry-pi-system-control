@@ -69,7 +69,15 @@ func (e *DiscordWebhookExporter) Export(ctx context.Context, res Result) error {
 }
 
 func formatDiscordMessage(res Result) string {
-	lines := "Metrics:"
+	collectedAt := time.Now().UTC()
+	for _, s := range res.Samples {
+		if !s.Timestamp.IsZero() {
+			collectedAt = s.Timestamp.UTC()
+			break
+		}
+	}
+
+	lines := fmt.Sprintf("Metrics (collected at %s):", collectedAt.Format(time.RFC3339))
 	for _, s := range res.Samples {
 		unit := s.Unit
 		if unit == "" {
