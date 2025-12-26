@@ -19,6 +19,7 @@ func main() {
 	tempPath := flag.String("temp-path", "/sys/class/thermal/thermal_zone0/temp", "sysfs path for CPU temperature")
 	discordWebhook := flag.String("discord-webhook", "", "Discord webhook URL (optional)")
 	discordEvery := flag.Duration("discord-every", 0, "How often to post to Discord (0 disables). e.g. 1m, 10m, 1h")
+	alsoConsole := flag.Bool("also-console", false, "When Discord is enabled, also print JSON to stdout")
 	flag.Parse()
 
 	// Register collectors
@@ -27,7 +28,13 @@ func main() {
 	}
 
 	runner := metrics.Runner{Collectors: metrics.All()}
-	consoleExporter := metrics.ConsoleExporter{Out: os.Stdout}
+	discordEnabled := *discordWebhook != "" && *discordEvery > 0
+	consoleEnabled := !discordEnabled || *alsoConsole
+
+	var consoleExporter metrics.Exporter
+	if consoleEnabled {
+		consoleExporter = metrics.ConsoleExporter{Out: os.Stdout}
+	}
 
 	var (
 		latestMu  sync.RWMutex
@@ -36,7 +43,7 @@ func main() {
 	)
 
 	var discordExporter metrics.Exporter
-	if *discordWebhook != "" && *discordEvery > 0 {
+	if discordEnabled {
 		discordExporter = &metrics.DiscordWebhookExporter{
 			WebhookURL: *discordWebhook,
 		}
@@ -94,8 +101,10 @@ func main() {
 		haveRes = true
 		latestMu.Unlock()
 
-		if err := consoleExporter.Export(ctx, res); err != nil {
-			log.Printf("export error: %v", err)
+		if consoleExporter != nil {
+			if err := consoleExporter.Export(ctx, res); err != nil {
+				log.Printf("export error: %v", err)
+			}
 		}
 
 		select {
