@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -26,14 +27,19 @@ func main() {
 	}
 
 	runner := metrics.Runner{Collectors: metrics.All()}
-	exporters := []metrics.Exporter{
-		metrics.ConsoleExporter{Out: os.Stdout},
-	}
+	consoleExporter := metrics.ConsoleExporter{Out: os.Stdout}
+
+	var (
+		latestMu  sync.RWMutex
+		latestRes metrics.Result
+		haveRes   bool
+	)
+
+	var discordExporter metrics.Exporter
 	if *discordWebhook != "" && *discordEvery > 0 {
-		exporters = append(exporters, &metrics.DiscordWebhookExporter{
-			WebhookURL:  *discordWebhook,
-			MinInterval: *discordEvery,
-		})
+		discordExporter = &metrics.DiscordWebhookExporter{
+			WebhookURL: *discordWebhook,
+		}
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -47,16 +53,49 @@ func main() {
 		cancel()
 	}()
 
+	if discordExporter != nil {
+		discordTicker := time.NewTicker(*discordEvery)
+		defer discordTicker.Stop()
+
+		go func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-discordTicker.C:
+					latestMu.RLock()
+					if !haveRes {
+						latestMu.RUnlock()
+						continue
+					}
+					res := metrics.Result{
+						Samples: append([]metrics.Sample(nil), latestRes.Samples...),
+						Errors:  append([]metrics.CollectorError(nil), latestRes.Errors...),
+					}
+					latestMu.RUnlock()
+
+					if err := discordExporter.Export(ctx, res); err != nil {
+						log.Printf("discord export error: %v", err)
+					}
+				}
+			}
+		}()
+	}
+
 	ticker := time.NewTicker(*interval)
 	defer ticker.Stop()
 
 	// Collect immediately once, then on interval
 	for {
 		res := runner.CollectOnce(ctx)
-		for _, exporter := range exporters {
-			if err := exporter.Export(ctx, res); err != nil {
-				log.Printf("export error: %v", err)
-			}
+
+		latestMu.Lock()
+		latestRes = res
+		haveRes = true
+		latestMu.Unlock()
+
+		if err := consoleExporter.Export(ctx, res); err != nil {
+			log.Printf("export error: %v", err)
 		}
 
 		select {
