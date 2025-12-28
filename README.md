@@ -55,6 +55,48 @@ To run discord messenger:
 ./bin/rpi-metrics -interval= {x}s -discord-webhook="https://discord.com/api/webhooks/{webook_id}" -discord-every= {x}s
 ```
 
+## Running persistently (SSH disconnect safe)
+
+If you start `rpi-metrics` directly in an SSH session, it will usually stop when the SSH connection closes (e.g. you close your laptop).
+
+### Option A: `tmux` (recommended for interactive control)
+
+On the Pi:
+
+```
+sudo apt-get update
+sudo apt-get install -y tmux
+./scripts/tmux-start.sh -- -interval=5s -discord-webhook="https://discord.com/api/webhooks/REPLACE_ME" -discord-every=1m
+```
+
+Detach without stopping it: press `Ctrl-b` then `d`.
+
+Later, reattach:
+
+```
+./scripts/tmux-attach.sh
+```
+
+Stop it: `Ctrl-c` inside the tmux session.
+
+Or stop the session directly:
+
+```
+./scripts/tmux-stop.sh
+```
+
+Check logs:
+
+```
+sudo journalctl -u rpi-metrics -f
+```
+
+Stop it:
+
+```
+sudo systemctl stop rpi-metrics
+```
+
 Flags
 - `interval` -
     Collection interval duration (Go duration format). Examples: 500ms, 2s, 30s, 1m.
@@ -66,6 +108,10 @@ Example:
 
 ```
 ./bin/rpi-metrics -interval=2s -temp-path=/sys/class/thermal/thermal_zone0/temp
+```
+
+```
+./bin/rpi-metrics -interval=5s -discord-webhook=https://discord.com/api/webhooks/{INSERT WEBHOOK} -discord-every=5s 
 ```
 
 ## Adding new metrics

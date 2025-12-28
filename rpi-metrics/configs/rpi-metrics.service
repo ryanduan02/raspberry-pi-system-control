@@ -1,0 +1,23 @@
+[Unit]
+Description=rpi-metrics agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Change these paths/user to match your Pi setup
+User=pi
+WorkingDirectory=/home/pi/Code/raspberry-pi-system-control/rpi-metrics
+ExecStart=/home/pi/Code/raspberry-pi-system-control/rpi-metrics/bin/rpi-metrics \
+  -interval=5s \
+  -discord-webhook=https://discord.com/api/webhooks/REPLACE_ME \
+  -discord-every=5m
+Restart=on-failure
+RestartSec=3
+
+# Optional: send stdout/stderr to journal (default)
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
