@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -17,6 +18,7 @@ import (
 func main() {
 	interval := flag.Duration("interval", 5*time.Second, "collection interval (e.g. 2s, 500ms, 1m)")
 	tempPath := flag.String("temp-path", "/sys/class/thermal/thermal_zone0/temp", "sysfs path for CPU temperature")
+	storagePaths := flag.String("storage-paths", "/", "Comma-separated list of filesystem paths to measure (e.g. /,/boot)")
 	discordWebhook := flag.String("discord-webhook", "", "Discord webhook URL (optional)")
 	discordEvery := flag.Duration("discord-every", 0, "How often to post to Discord (0 disables). e.g. 1m, 10m, 1h")
 	alsoConsole := flag.Bool("also-console", false, "When Discord is enabled, also print JSON to stdout")
@@ -24,6 +26,9 @@ func main() {
 
 	// Register collectors
 	if err := metrics.Register(collectors.CPUTempSysfs{Path: *tempPath}); err != nil {
+		log.Fatalf("register collector: %v", err)
+	}
+	if err := metrics.Register(collectors.StorageStatfs{Paths: splitCSV(*storagePaths)}); err != nil {
 		log.Fatalf("register collector: %v", err)
 	}
 
@@ -113,4 +118,20 @@ func main() {
 		case <-ticker.C:
 		}
 	}
+}
+
+func splitCSV(s string) []string {
+	if s == "" {
+		return nil
+	}
+	parts := strings.Split(s, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		out = append(out, p)
+	}
+	return out
 }
