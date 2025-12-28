@@ -11,6 +11,8 @@ Current milestone: collect CPU temperature from sysfs on an interval and emit st
 - Console exporter (JSON Lines to stdout)
 - CPU temperature collector with sysfs:
   - `/sys/class/thermal/thermal_zone0/temp` (millidegrees Celsius)
+- Storage usage collector (Linux `statfs`):
+    - Total/free/available/used bytes and used percent (per configured path)
 
 ## Requirements
 
@@ -104,10 +106,15 @@ Flags
 - `temp-path` -
     Path to the sysfs temperature file.
 
+- `storage-paths` -
+    Comma-separated list of filesystem paths to measure. Examples: `/` or `/,/boot`.
+
 Example:
 
 ```
 ./bin/rpi-metrics -interval=2s -temp-path=/sys/class/thermal/thermal_zone0/temp
+
+./bin/rpi-metrics -interval=5s -storage-paths=/,/boot
 ```
 
 ```
