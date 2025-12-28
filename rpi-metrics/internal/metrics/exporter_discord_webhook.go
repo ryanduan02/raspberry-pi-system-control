@@ -78,13 +78,25 @@ func formatDiscordMessage(res Result) string {
 	}
 
 	lines := fmt.Sprintf("Metrics (collected at %s):", collectedAt.Format(time.RFC3339))
+
+	// Print one line per metric sample.
 	for _, s := range res.Samples {
 		unit := s.Unit
 		if unit == "" {
 			unit = "(no unit)"
 		}
-		lines += fmt.Sprintf("\n- %s: %.3f %s", s.Name, s.Value, unit)
+
+		if unit == "bytes" {
+			lines += fmt.Sprintf("\n%s: %s", s.Name, fmtBytesAsGigabytesWithRawBytes(s.Value))
+			continue
+		}
+		if unit == "celsius" {
+			lines += fmt.Sprintf("\n%s: %.3f celsius", s.Name, s.Value)
+			continue
+		}
+		lines += fmt.Sprintf("\n%s: %.3f %s", s.Name, s.Value, unit)
 	}
+
 	if len(res.Errors) > 0 {
 		lines += "\nErrors:"
 		for _, e := range res.Errors {
@@ -92,4 +104,13 @@ func formatDiscordMessage(res Result) string {
 		}
 	}
 	return lines
+}
+
+func fmtBytesAsGigabytesWithRawBytes(v float64) string {
+	// Uses decimal gigabytes (1 GB = 1,000,000,000 bytes).
+	if v < 0 {
+		v = 0
+	}
+	gb := v / 1_000_000_000.0
+	return fmt.Sprintf("%.3f gigabytes (%.3f bytes)", gb, v)
 }
