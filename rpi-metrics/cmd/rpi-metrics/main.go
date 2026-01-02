@@ -11,18 +11,19 @@ import (
 	"syscall"
 	"time"
 
+	"rpi-metrics/constants"
 	"rpi-metrics/internal/collectors"
 	"rpi-metrics/internal/metrics"
 )
 
 func main() {
-	interval := flag.Duration("interval", 5*time.Second, "collection interval (e.g. 2s, 500ms, 1m)")
-	tempPath := flag.String("temp-path", "/sys/class/thermal/thermal_zone0/temp", "sysfs path for CPU temperature")
-	coolingPath := flag.String("cooling-path", "/sys/class/thermal/cooling_device0/cur_state", "sysfs path for cooling device")
-	storagePaths := flag.String("storage-paths", "/", "Comma-separated list of filesystem paths to measure (e.g. /,/boot)")
-	discordWebhook := flag.String("discord-webhook", "", "Discord webhook URL (optional)")
-	discordEvery := flag.Duration("discord-every", 0, "How often to post to Discord (0 disables). e.g. 1m, 10m, 1h")
-	alsoConsole := flag.Bool("also-console", false, "When Discord is enabled, also print JSON to stdout")
+	interval := flag.Duration(constants.FlagInterval, constants.DefaultCollectionInterval, constants.FlagUsageInterval)
+	tempPath := flag.String(constants.FlagTempPath, constants.DefaultCPUTempSysfsPath, constants.FlagUsageTempPath)
+	coolingPath := flag.String(constants.FlagCoolingPath, constants.DefaultCPUCoolingDevicefsPath, constants.FlagUsageCoolingPath)
+	storagePaths := flag.String(constants.FlagStoragePaths, constants.DefaultStoragePathsCSV, constants.FlagUsageStoragePaths)
+	discordWebhook := flag.String(constants.FlagDiscordWebhook, constants.DefaultDiscordWebhookURL, constants.FlagUsageDiscordWebhook)
+	discordEvery := flag.Duration(constants.FlagDiscordEvery, constants.DefaultDiscordPostEvery, constants.FlagUsageDiscordEvery)
+	alsoConsole := flag.Bool(constants.FlagAlsoConsole, constants.DefaultAlsoConsoleWhenDiscordOn, constants.FlagUsageAlsoConsole)
 	flag.Parse()
 
 	// Set up ordered collectors
