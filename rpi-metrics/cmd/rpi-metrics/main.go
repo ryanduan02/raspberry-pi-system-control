@@ -18,6 +18,7 @@ import (
 func main() {
 	interval := flag.Duration("interval", 5*time.Second, "collection interval (e.g. 2s, 500ms, 1m)")
 	tempPath := flag.String("temp-path", "/sys/class/thermal/thermal_zone0/temp", "sysfs path for CPU temperature")
+	coolingPath := flag.String("cooling-path", "/sys/class/thermal/cooling_device0/cur_state", "sysfs path for cooling device")
 	storagePaths := flag.String("storage-paths", "/", "Comma-separated list of filesystem paths to measure (e.g. /,/boot)")
 	discordWebhook := flag.String("discord-webhook", "", "Discord webhook URL (optional)")
 	discordEvery := flag.Duration("discord-every", 0, "How often to post to Discord (0 disables). e.g. 1m, 10m, 1h")
@@ -31,6 +32,10 @@ func main() {
 	if err := metrics.Register(collectors.StorageStatfs{Paths: splitCSV(*storagePaths)}); err != nil {
 		log.Fatalf("register collector: %v", err)
 	}
+	if err := metrics.Register(collectors.CPUCoolingDevicefs{Path: *coolingPath}); err != nil {
+		log.Fatalf("register collector: %v", err)
+	}
+
 
 	runner := metrics.Runner{Collectors: metrics.All()}
 	discordEnabled := *discordWebhook != "" && *discordEvery > 0
