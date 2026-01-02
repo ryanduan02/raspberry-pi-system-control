@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"rpi-metrics/internal/metrics"
+	"rpi-metrics/constants"
 )
 
 type CPUTempSysfs struct {
@@ -22,7 +23,7 @@ func (c CPUTempSysfs) Collect(ctx context.Context) ([]metrics.Sample, error) {
 
 	path := c.Path
 	if path == "" {
-		path = "/sys/class/thermal/thermal_zone0/temp"
+		path = constants.DefaultCPUTempSysfsPath
 	}
 
 	b, err := os.ReadFile(path)

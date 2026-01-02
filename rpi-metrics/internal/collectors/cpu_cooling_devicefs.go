@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"rpi-metrics/internal/metrics"
+	"rpi-metrics/constants"
 )
 
 type CPUCoolingDevicefs struct {
@@ -23,7 +24,7 @@ func (c CPUCoolingDevicefs) Collect(ctx context.Context) ([]metrics.Sample, erro
 	path := c.Path
 
 	if path == "" {
-		path = "/sys/class/thermal/cooling_device0/cur_state"
+		path = constants.DefaultCPUCoolingDevicefsPath
 	}
 
 	b, err := os.ReadFile(path)
