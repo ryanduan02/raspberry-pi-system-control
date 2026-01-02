@@ -25,19 +25,14 @@ func main() {
 	alsoConsole := flag.Bool("also-console", false, "When Discord is enabled, also print JSON to stdout")
 	flag.Parse()
 
-	// Register collectors
-	if err := metrics.Register(collectors.CPUTempSysfs{Path: *tempPath}); err != nil {
-		log.Fatalf("register collector: %v", err)
-	}
-	if err := metrics.Register(collectors.StorageStatfs{Paths: splitCSV(*storagePaths)}); err != nil {
-		log.Fatalf("register collector: %v", err)
-	}
-	if err := metrics.Register(collectors.CPUCoolingDevicefs{Path: *coolingPath}); err != nil {
-		log.Fatalf("register collector: %v", err)
+	// Set up ordered collectors
+	collectorList := []metrics.Collector{
+		collectors.CPUTempSysfs{Path: *tempPath},
+		collectors.CPUCoolingDevicefs{Path: *coolingPath},
+		collectors.StorageStatfs{Paths: splitCSV(*storagePaths)},
 	}
 
-
-	runner := metrics.Runner{Collectors: metrics.All()}
+	runner := metrics.Runner{Collectors: collectorList}
 	discordEnabled := *discordWebhook != "" && *discordEvery > 0
 	consoleEnabled := !discordEnabled || *alsoConsole
 
