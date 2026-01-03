@@ -2,8 +2,6 @@
 
 A metrics agent for Raspberry Pi written in Go.  
 
-Current milestone: collect CPU temperature from sysfs on an interval and emit structured JSON to stdout. The code is set up so adding a new metric is just adding a new collector and registering it.
-
 ## Features
 
 - Collector based architecture
