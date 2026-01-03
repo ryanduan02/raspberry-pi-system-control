@@ -138,4 +138,4 @@ Collectors live in `internal/collectors/` and return one or more `metrics.Sample
 
 ## Notes
 
-This tool currently exports to stdout only. It is designed so additional exporters can be added later (HTTP/Prometheus scrape endpoint, MQTT, InfluxDB, etc.).      CPU temperature reading uses sysfs for simplicity and performance.
+This tool currently exports to stdout only. It is designed so additional exporters can be added later (HTTP/Prometheus scrape endpoint, MQTT, InfluxDB, etc.).      CPU metrics reading uses sysfs for simplicity and performance.
