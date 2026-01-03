@@ -14,7 +14,7 @@ A metrics agent for Raspberry Pi written in Go.
 
 ## Requirements
 
-- Raspberry Pi OS (or another Linux that exposes CPU temp via sysfs)
+- Raspberry Pi OS
 - Go installed (Go 1.22+ recommended)
 
 ## Usage
