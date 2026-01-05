@@ -59,7 +59,7 @@ To run discord messenger:
 
 If you start `rpi-metrics` directly in an SSH session, it will usually stop when the SSH connection closes (e.g. you close your laptop).
 
-### Option A: `tmux` (recommended for interactive control)
+### TMUX
 
 On the Pi:
 
@@ -118,23 +118,6 @@ Example:
 ```
 ./bin/rpi-metrics -interval=5s -discord-webhook=https://discord.com/api/webhooks/{INSERT WEBHOOK} -discord-every=5s 
 ```
-
-## Adding new metrics
-
-Add a new collector implementing the metrics. Collector interface:
-
-```
-type Collector interface {
-    ID() string
-    Collect(ctx context.Context) ([]Sample, error)
-}
-```
-
-Then register it in `cmd/rpi-metrics/main.go` using:
-
-`metrics.Register(yourCollector{})`
-
-Collectors live in `internal/collectors/` and return one or more `metrics.Sample` values, which are aggregated by the runner and emitted by the exporter.
 
 ## Notes
 
