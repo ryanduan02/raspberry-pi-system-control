@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"rpi-metrics/constants"
 )
 
 type DiscordWebhookExporter struct {
@@ -77,7 +79,7 @@ func formatDiscordMessage(res Result) string {
 		}
 	}
 
-	lines := fmt.Sprintf("Metrics (collected at %s):", collectedAt.Format(time.RFC3339))
+	lines := fmt.Sprintf("%s\nMetrics (collected at %s):", constants.DiscordMessageSeparator, collectedAt.Format(time.RFC3339))
 
 	// Print one line per metric sample.
 	for _, s := range res.Samples {
