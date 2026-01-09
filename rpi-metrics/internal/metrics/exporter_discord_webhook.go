@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"rpi-metrics/constants"
@@ -79,7 +80,8 @@ func formatDiscordMessage(res Result) string {
 		}
 	}
 
-	lines := fmt.Sprintf("%s\nMetrics (collected at %s):", constants.DiscordMessageSeparator, collectedAt.Format(time.RFC3339))
+	separator := strings.Repeat("-", constants.DiscordMessageSeparatorLen)
+	lines := fmt.Sprintf("%s\nMetrics (collected at %s):", separator, collectedAt.Format(time.RFC3339))
 
 	// Print one line per metric sample.
 	for _, s := range res.Samples {

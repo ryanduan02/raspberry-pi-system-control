@@ -1,6 +1,7 @@
 package constants
 
 const (
-	// DiscordMessageSeparator is prefixed to every Discord message sent by the bot.
-	DiscordMessageSeparator = "--------------------------------"
+	// DiscordMessageSeparatorLen controls the number of hyphens used as a visible
+	// separator line in Discord messages.
+	DiscordMessageSeparatorLen = 74
 )
