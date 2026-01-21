@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -83,8 +84,16 @@ func formatDiscordMessage(res Result) string {
 	separator := strings.Repeat("-", constants.DiscordMessageSeparatorLen)
 	lines := fmt.Sprintf("%s\nMetrics (collected at %s):", separator, collectedAt.Format(time.RFC3339))
 
+	if cpuBlock := buildCPUUtilizationBlock(res.Samples); cpuBlock != "" {
+		lines += "\n" + cpuBlock
+	}
+
 	// Print one line per metric sample.
 	for _, s := range res.Samples {
+		if isCPUBlockSample(s) {
+			continue
+		}
+
 		unit := s.Unit
 		if unit == "" {
 			unit = "(no unit)"
@@ -108,6 +117,54 @@ func formatDiscordMessage(res Result) string {
 		}
 	}
 	return lines
+}
+
+func buildCPUUtilizationBlock(samples []Sample) string {
+	var overall *Sample
+	perCore := make([]Sample, 0)
+
+	for _, s := range samples {
+		switch s.Name {
+		case "cpu_utilization":
+			cpuID := s.Labels["cpu"]
+			if cpuID == "" || cpuID == "total" {
+				sCopy := s
+				overall = &sCopy
+			} else {
+				perCore = append(perCore, s)
+			}
+		}
+	}
+
+	if overall == nil && len(perCore) == 0 {
+		return ""
+	}
+
+	lines := "CPU Utilization:"
+	if overall != nil {
+		lines += fmt.Sprintf("\n- overall: %.2f%%", overall.Value)
+	}
+
+	if len(perCore) > 0 {
+		sort.Slice(perCore, func(i, j int) bool {
+			return perCore[i].Labels["cpu"] < perCore[j].Labels["cpu"]
+		})
+		for _, s := range perCore {
+			cpuID := s.Labels["cpu"]
+			lines += fmt.Sprintf("\n- %s: %.2f%%", cpuID, s.Value)
+		}
+	}
+
+	return lines
+}
+
+func isCPUBlockSample(s Sample) bool {
+	switch s.Name {
+	case "cpu_utilization":
+		return true
+	default:
+		return false
+	}
 }
 
 func fmtBytesAsGigabytesWithRawBytes(v float64) string {

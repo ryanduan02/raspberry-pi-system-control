@@ -29,6 +29,7 @@ func main() {
 	// Set up ordered collectors
 	collectorList := []metrics.Collector{
 		collectors.CPUTempSysfs{Path: *tempPath},
+		&collectors.CPUUtilizationProcfs{},
 		collectors.CPUCoolingDevicefs{Path: *coolingPath},
 		collectors.StorageStatfs{Paths: splitCSV(*storagePaths)},
 	}
