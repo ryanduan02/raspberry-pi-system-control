@@ -119,6 +119,46 @@ Example:
 ./bin/rpi-metrics -interval=5s -discord-webhook=https://discord.com/api/webhooks/{INSERT WEBHOOK} -discord-every=5s 
 ```
 
+## Web UI Dashboard
+
+A web-based dashboard is available to visualize metrics in real-time.
+This should be packaged eventually
+
+### Build
+
+```bash
+cd ~/Code/raspberry-pi-system-control/rpi-metrics
+go build -o ./bin/rpi-metrics-ui ./cmd/rpi-metrics-ui
+```
+
+### Run
+
+```bash
+./bin/rpi-metrics-ui
+```
+
+Then open `http://localhost:8080` in your browser.
+
+#### Flags
+
+- `-port` - HTTP server port (default: 8080)
+
+Example with custom port:
+
+```bash
+./bin/rpi-metrics-ui -port=3000
+```
+
+### Features
+
+- **CPU Temperature** - Color-coded display with progress bar
+- **CPU Utilization** - Total usage plus per-core breakdown
+- **Cooling State** - Visual fan speed indicator (0-4 levels)
+- **Storage** - Multiple mount points with used/free/total display
+- Auto-refresh every 2 seconds
+- Pause/Resume functionality
+- Responsive design for mobile devices
+
 ## Notes
 
 This tool currently exports to stdout only. It is designed so additional exporters can be added later (HTTP/Prometheus scrape endpoint, MQTT, InfluxDB, etc.).      CPU metrics reading uses sysfs for simplicity and performance.
