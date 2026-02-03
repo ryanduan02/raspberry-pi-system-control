@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi Metrics Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍓 Raspberry Pi Metrics</h1>
+            <div class="status">
+                <span id="connection-status" class="status-indicator offline"></span>
+                <span id="last-update">Last update: --</span>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <!-- CPU Temperature Card -->
+            <div class="card" id="cpu-temp-card">
+                <div class="card-header">
+                    <span class="card-icon">🌡️</span>
+                    <h2>CPU Temperature</h2>
+                </div>
+                <div class="card-body">
+                    <div class="metric-value">
+                        <span id="cpu-temp-value">--</span>
+                        <span class="unit">°C</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="cpu-temp-bar" class="progress-fill temp"></div>
+                    </div>
+                    <div class="metric-range">
+                        <span>0°C</span>
+                        <span>85°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CPU Utilization Card -->
+            <div class="card" id="cpu-util-card">
+                <div class="card-header">
+                    <span class="card-icon">⚡</span>
+                    <h2>CPU Utilization</h2>
+                </div>
+                <div class="card-body">
+                    <div class="metric-value">
+                        <span id="cpu-util-value">--</span>
+                        <span class="unit">%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="cpu-util-bar" class="progress-fill cpu"></div>
+                    </div>
+                    <div id="cpu-cores" class="cpu-cores"></div>
+                </div>
+            </div>
+
+            <!-- Cooling State Card -->
+            <div class="card" id="cooling-card">
+                <div class="card-header">
+                    <span class="card-icon">❄️</span>
+                    <h2>Cooling State</h2>
+                </div>
+                <div class="card-body">
+                    <div class="metric-value">
+                        <span id="cooling-value">--</span>
+                        <span class="unit">/ 4</span>
+                    </div>
+                    <div class="cooling-indicator">
+                        <div class="cooling-level" data-level="0"></div>
+                        <div class="cooling-level" data-level="1"></div>
+                        <div class="cooling-level" data-level="2"></div>
+                        <div class="cooling-level" data-level="3"></div>
+                        <div class="cooling-level" data-level="4"></div>
+                    </div>
+                    <p class="cooling-status" id="cooling-status">Fan: Off</p>
+                </div>
+            </div>
+
+            <!-- Storage Card -->
+            <div class="card wide" id="storage-card">
+                <div class="card-header">
+                    <span class="card-icon">💾</span>
+                    <h2>Storage</h2>
+                </div>
+                <div class="card-body">
+                    <div id="storage-mounts" class="storage-mounts">
+                        <!-- Storage mount points will be added here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Refresh interval: <span id="refresh-interval">2</span>s</p>
+            <button id="pause-btn" class="btn">Pause</button>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
