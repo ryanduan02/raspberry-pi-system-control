@@ -3,14 +3,12 @@
 A metrics agent for Raspberry Pi written in Go.  
 
 ## Features
-
-- Collector based architecture
-- Interval scheduler/runner
 - Console exporter (JSON Lines to stdout)
 - CPU temperature collector with sysfs:
   - `/sys/class/thermal/thermal_zone0/temp` (millidegrees Celsius)
 - Storage usage collector (Linux `statfs`):
     - Total/free/available/used bytes and used percent (per configured path)
+- CPU usage collector
 
 ## Requirements
 
@@ -120,6 +118,7 @@ Example:
 ```
 
 ## Web UI Dashboard
+<img width="883" height="593" alt="Screenshot 2026-02-23 at 4 27 01 PM" src="https://github.com/user-attachments/assets/d39f923a-c7ae-4aad-9310-321f6d1cf5b9" />
 
 A web-based dashboard is available to visualize metrics in real-time.
 This should be packaged eventually
